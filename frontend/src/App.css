@@ -1,0 +1,131 @@
+h1{
+  color: #1A365D;
+  text-align: center;
+}
+.form {
+  max-width: 500px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #1A365D;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.form h3 {
+  margin-top: 0;
+  color: #FBBF24;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.form label {
+  font-weight: 600;
+  color: #FBBF24;
+}
+
+.form input[type="text"],
+.form input[type="email"],
+.form input[type="password"],
+.form input[type="number"] ,
+.form select{
+  width: 95%;
+  padding: 0.75rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 1.5rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form select {
+  width: 100%;
+  margin-top: 15px;
+  margin-bottom: 2rem ;
+}
+.form input:focus {
+  border-color: #2d5da1;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+.form div {
+  margin-bottom: 1.5rem;
+}
+
+.form p {
+  margin-top: 0;
+  font-weight: 600;
+  color: #FBBF24;
+}
+
+.form ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.form li {
+  margin-bottom: 0.5rem;
+}
+
+.form label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+
+.form button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  font-weight: bold;
+  color: #1A365D;
+  background-color: #FBBF24;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.form button:hover {
+  background-color: #d29f1e;
+}
+
+.container {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.container h3 {
+  color: #1A365D; 
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.table thead {
+  background-color: #1A365D;
+  color: white;
+}
+
+.table th,
+.table td {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+}
+
+.table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+

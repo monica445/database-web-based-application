@@ -5,14 +5,16 @@ export async function createRoleWithPrivileges(name, description, privileges) {
   try {
     await client.query('BEGIN');
 
-    // Insert into app-level roles table
+    const isAll = privileges.includes('ALL');
+
+    // Insert into roles table
     const roleResult = await client.query(
       'INSERT INTO roles (name, description) VALUES ($1, $2) RETURNING id',
       [name, description]
     );
     const roleId = roleResult.rows[0].id;
 
-    // Insert privileges into role_privileges
+    // Insert privileges
     for (const privilege of privileges) {
       await client.query(
         'INSERT INTO role_privileges (role_id, privilege) VALUES ($1, $2)',
@@ -20,7 +22,7 @@ export async function createRoleWithPrivileges(name, description, privileges) {
       );
     }
 
-    // Create PostgreSQL role if not exists
+    // Create PostgreSQL role if it doesn't exist
     await client.query(`DO $$
       BEGIN
         IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = '${name}') THEN
@@ -29,24 +31,39 @@ export async function createRoleWithPrivileges(name, description, privileges) {
       END
     $$;`);
 
-    // Grant table-level privileges
-    const tablePrivs = privileges.filter(p => ['SELECT', 'INSERT', 'UPDATE', 'DELETE'].includes(p));
-    if (tablePrivs.length) {
-      await client.query(`GRANT ${tablePrivs.join(', ')} ON ALL TABLES IN SCHEMA public TO "${name}"`);
-    }
+    if (isAll) {
+      // Grant full control across the database
+      await client.query(`GRANT ALL PRIVILEGES ON DATABASE current_database() TO "${name}"`);
+      await client.query(`GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "${name}"`);
+      await client.query(`GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "${name}"`);
+      await client.query(`GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "${name}"`);
+      await client.query(`GRANT CREATE, USAGE ON SCHEMA public TO "${name}"`);
+    } else {
+      // Grant table-level privileges
+      const tablePrivs = privileges.filter(p =>
+        ['SELECT', 'INSERT', 'UPDATE', 'DELETE'].includes(p)
+      );
+      if (tablePrivs.length) {
+        await client.query(
+          `GRANT ${tablePrivs.join(', ')} ON ALL TABLES IN SCHEMA public TO "${name}"`
+        );
+      }
 
-    // Grant CREATE on schema
-    if (privileges.includes('CREATE')) {
-      await client.query(`GRANT CREATE ON SCHEMA public TO "${name}"`);
-    }
+      if (privileges.includes('CREATE')) {
+        await client.query(`GRANT CREATE ON SCHEMA public TO "${name}"`);
+      }
 
-    // Grant EXECUTE on functions
-    if (privileges.includes('EXECUTE')) {
-      await client.query(`GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO "${name}"`);
-    }
+      if (privileges.includes('EXECUTE')) {
+        await client.query(
+          `GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO "${name}"`
+        );
+      }
 
-    // Grant USAGE on sequences
-    await client.query(`GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO "${name}"`);
+      // Always give basic sequence access
+      await client.query(
+        `GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO "${name}"`
+      );
+    }
 
     await client.query('COMMIT');
     return { success: true, roleId };
@@ -57,7 +74,6 @@ export async function createRoleWithPrivileges(name, description, privileges) {
     client.release();
   }
 }
-
 
 
 export async function createUserAndAssignRole(username, email, password, roleName) {

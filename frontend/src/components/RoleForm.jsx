@@ -9,7 +9,8 @@ const availablePrivileges = [
   'CREATE',
   'DROP',
   'ALTER',
-  'EXECUTE'
+  'EXECUTE',
+  'ALL PRIVILEGES'
 ];
 
 function RoleForm() {
@@ -17,13 +18,27 @@ function RoleForm() {
   const [description, setDescription] = useState('');
   const [selectedPrivileges, setSelectedPrivileges] = useState([]);
 
-  const handleCheckboxChange = (privilege) => {
-    setSelectedPrivileges((prev) =>
-      prev.includes(privilege)
-        ? prev.filter((p) => p !== privilege)
-        : [...prev, privilege]
-    );
+  const handlePrivilegeChange = (privilege) => {
+    if (privilege === 'ALL PRIVILEGES') {
+      const confirmed = window.confirm(
+        'Are you sure you want to grant ALL privileges to this role? This gives full control over the entire database.'
+      );
+      if (confirmed) {
+        setSelectedPrivileges(['ALL PRIVILEGES']);
+      }
+    } else {
+      // Prevent checking other privileges if ALL is selected
+      if (selectedPrivileges.includes('ALL PRIVILEGES')) return;
+
+      setSelectedPrivileges((prev) =>
+        prev.includes(privilege)
+          ? prev.filter((p) => p !== privilege)
+          : [...prev, privilege]
+      );
+    }
   };
+
+  const isAllSelected = selectedPrivileges.includes('ALL PRIVILEGES');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -59,9 +74,10 @@ function RoleForm() {
                 <input
                   type="checkbox"
                   checked={selectedPrivileges.includes(privilege)}
-                  onChange={() => handleCheckboxChange(privilege)}
+                  disabled={isAllSelected && privilege !== 'ALL'}
+                  onChange={() => handlePrivilegeChange(privilege)}
                 />
-                {privilege}
+                {privilege === 'ALL PRIVILEGES' ? 'ALL PRIVILEGES (grant full database access)' : privilege}
               </label>
             </li>
           ))}
